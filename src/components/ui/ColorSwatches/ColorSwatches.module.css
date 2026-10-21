@@ -1,0 +1,30 @@
+.container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.swatch {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 2px solid #334155;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.swatch:hover {
+  transform: scale(1.1);
+}
+
+.active {
+  border-color: #f8fafc;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
