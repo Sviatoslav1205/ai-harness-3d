@@ -1,5 +1,9 @@
 # Interactive 3D Geometry & Material Studio
 
+[![CI](https://github.com/Sviatoslav1205/ai-harness-3d/actions/workflows/ci.yml/badge.svg)](https://github.com/Sviatoslav1205/ai-harness-3d/actions/workflows/ci.yml)
+
+**[Live Demo](https://sviatoslav1205.github.io/ai-harness-3d/)**
+
 A browser-based interactive 3D studio built with React, TypeScript, and Three.js (via `@react-three/fiber` and `@react-three/drei`). Users can rotate, zoom, and re-skin a 3D object by switching geometry, material, color, and environment presets in real time.
 
 ## AI Harness Architecture
