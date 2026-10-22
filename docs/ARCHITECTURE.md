@@ -7,12 +7,16 @@ App                                          (src/App.tsx)
 │   ├── StudioLights                         (src/components/canvas/StudioLights/StudioLights.tsx)
 │   ├── StageFloor                           (src/components/canvas/StageFloor/StageFloor.tsx)
 │   ├── StudioObject                         (src/components/canvas/StudioObject/StudioObject.tsx)
+│   ├── Environment                          (@react-three/drei, not authored — procedural Lightformers only, no HDRI)
 │   └── OrbitControls                        (@react-three/drei, not authored)
 └── ControlPanel                             (src/components/ui/ControlPanel/ControlPanel.tsx)
     ├── ShapeSelector                        (src/components/ui/ShapeSelector/ShapeSelector.tsx)
     ├── MaterialSelector                     (src/components/ui/MaterialSelector/MaterialSelector.tsx)
     ├── ColorSwatches                        (src/components/ui/ColorSwatches/ColorSwatches.tsx)
+    ├── EnvironmentSelector                  (src/components/ui/EnvironmentSelector/EnvironmentSelector.tsx)
     ├── RotationControls                     (src/components/ui/RotationControls/RotationControls.tsx)
+    ├── SurpriseButton                       (src/components/ui/SurpriseButton/SurpriseButton.tsx)
+    ├── CopyLinkButton                       (src/components/ui/CopyLinkButton/CopyLinkButton.tsx)
     └── ResetButton                          (src/components/ui/ResetButton/ResetButton.tsx)
 ```
 Every path above is a component *folder*, not a bare file — see `docs/STANDARDS.md` §2 for the exact barrel contents per component. `Scene` and every `ui/` component get the full 3-file barrel (`.tsx` + `.module.css` + `index.ts`) because each renders real DOM (`Scene` mounts the `<canvas>` element and its responsive wrapper `div`; the `ui/` components render HTML controls). `StudioLights`, `StageFloor`, and `StudioObject` render **no DOM** — they are pure Three.js scene-graph nodes mounted *inside* `Scene`'s `<Canvas>` — so they use the reduced 2-file barrel (`.tsx` + `index.ts`, no `.module.css`) per `docs/STANDARDS.md` §2.
@@ -28,6 +32,15 @@ Every path above is a component *folder*, not a bare file — see `docs/STANDARD
 ```ts
 export type ShapeType = 'box' | 'torusKnot' | 'icosahedron';
 export type MaterialType = 'standard' | 'metallic' | 'wireframe';
+export type EnvironmentPreset = 'studio' | 'sunset' | 'warehouse' | 'night';
+
+export interface LightformerConfig {
+  position: readonly [number, number, number];
+  color: string;
+  intensity: number;
+  scale: number | readonly [number, number];
+  form: 'rect' | 'circle' | 'ring';
+}
 
 export interface StudioState {
   shape: ShapeType;
@@ -35,6 +48,7 @@ export interface StudioState {
   color: string;        // hex string, must be one of COLOR_SWATCHES in src/constants/studio.ts
   autoRotate: boolean;
   speed: number;         // 0–5 inclusive, see SPEED_BOUNDS
+  environment: EnvironmentPreset;
 }
 
 export interface StudioActions {
@@ -43,6 +57,8 @@ export interface StudioActions {
   setColor: (color: string) => void;
   setAutoRotate: (autoRotate: boolean) => void;
   setSpeed: (speed: number) => void;
+  setEnvironment: (environment: EnvironmentPreset) => void;
+  randomize: () => void;
   reset: () => void;
 }
 
@@ -51,7 +67,9 @@ export type UseStudioStateReturn = { state: StudioState } & StudioActions;
 
 ### 3.2 Default State & Bounds (`src/constants/studio.ts`)
 ```ts
-import type { StudioState, ShapeType, MaterialType } from '@/types/studio';
+import type { StudioState, ShapeType, MaterialType, EnvironmentPreset, LightformerConfig } from '@/types/studio';
+
+export const DEFAULT_ENVIRONMENT_PRESET: EnvironmentPreset = 'studio';
 
 export const DEFAULT_STUDIO_STATE: StudioState = {
   shape: 'box',
@@ -59,10 +77,12 @@ export const DEFAULT_STUDIO_STATE: StudioState = {
   color: '#3b82f6', // Cyber Blue
   autoRotate: false,
   speed: 2,
+  environment: DEFAULT_ENVIRONMENT_PRESET,
 };
 
 export const SHAPE_OPTIONS: readonly ShapeType[] = ['box', 'torusKnot', 'icosahedron'];
 export const MATERIAL_OPTIONS: readonly MaterialType[] = ['standard', 'metallic', 'wireframe'];
+export const ENVIRONMENT_OPTIONS: readonly EnvironmentPreset[] = ['studio', 'sunset', 'warehouse', 'night'];
 
 export const COLOR_SWATCHES = [
   { id: 'cyber-blue', hex: '#3b82f6', label: 'Cyber Blue' },
@@ -72,6 +92,18 @@ export const COLOR_SWATCHES = [
 ] as const;
 
 export const SPEED_BOUNDS = { min: 0, max: 5, step: 1 } as const;
+
+// Procedural reflection rigs — no HDRI files, no network fetch (see §6).
+// Task 9 ships only the `studio` entry; Task 11 fills in the remaining three.
+export const ENVIRONMENT_PRESETS: Record<EnvironmentPreset, readonly LightformerConfig[]> = {
+  studio: [
+    { position: [0, 4, 0], color: '#ffffff', intensity: 2, scale: 6, form: 'rect' },
+    { position: [-4, 1, 2], color: '#e2e8f0', intensity: 1, scale: 3, form: 'rect' },
+  ],
+  sunset: [],
+  warehouse: [],
+  night: [],
+};
 ```
 
 **Default rationale (non-obvious choices only):**
@@ -137,7 +169,19 @@ vi.mock('@react-three/fiber', async (importOriginal) => {
 - `ControlPanel` (and each of its five children) is tested with `@testing-library/react` against the exact `aria-label` / `data-testid` contract in `docs/SPECS.md` §3.
 - `Scene` is exercised only through the mocked `Canvas` in `src/test/setup.ts` — asserting the `r3f-canvas-mock` testid renders and receives the expected props. `StudioLights`/`StageFloor`/`StudioObject` are not mounted in jsdom at all (the mock swallows `Canvas` children); their tests are limited to verifying the exported function/constants wiring (see `docs/TASKS.md`). Actual WebGL pixel output is out of scope for unit tests.
 
-## 6. Non-Goals
+## 6. Environment & Randomization Architecture
+- The studio environment (Task 9/11) is generated procedurally via `@react-three/drei`'s `<Environment>` wrapping a fixed set of `<Lightformer>` elements — never a loaded HDRI file. This keeps the render deterministic and removes any runtime network/CDN dependency, consistent with this project's zero-flakiness quality-gate philosophy (`docs/AGENTS.md` §3–4).
+- Each `EnvironmentPreset` maps to its own array of `LightformerConfig` objects (`{ position, color, intensity, scale, form }`) held in `ENVIRONMENT_PRESETS` (`src/constants/studio.ts`). Switching presets swaps which array `Scene` renders; it never triggers a fetch.
+- `StudioActions.randomize()` (Task 12) lives in `useStudioState.ts`, not in `SurpriseButton` — the hook already owns every other state transition, and keeping the random pick there means `randomize()` is covered by the same single-source-of-truth tests as `setShape`/`setMaterial`/etc. `SurpriseButton` only calls it.
+
+## 7. Shareable State Links Architecture
+- `useStudioState.ts` owns the **read side**: on first render it lazily reads `window.location.search`, validates any recognized params against the existing option constants (invalid/missing fields fall back to `DEFAULT_STUDIO_STATE`), and uses the merged result as its initial state. If — and only if — params were present, a mount-only `useEffect` calls `window.history.replaceState(null, '', window.location.pathname)` so the address bar shows a clean URL while the decoded state stays applied. A normal, param-less load never touches `history`.
+- `useShareableLink.ts` owns the **write side**: it exports the pure `encodeStudioState`/`decodeStudioState` functions (used by both hooks) and a `copyLink(state)` helper that builds the full URL and calls `navigator.clipboard.writeText`. It holds no state of its own and never reads `window.location` itself — `useStudioState` is the only thing that applies decoded params, keeping "no raw setState escapes the hook" intact (§2).
+- `CopyLinkButton` (Task 14) is the only place the generated link is ever displayed to the user; clicking it is the only way a special URL appears, and only in that transient confirmation element — the visible address bar itself is changed only by Task 13's one-time load-and-clean effect, never by the copy action.
+
+## 8. Non-Goals
 - No backend, persistence, routing, or multi-page navigation.
 - No support for user-uploaded 3D models — the geometry set is fixed to `box` / `torusKnot` / `icosahedron` per `docs/SPECS.md`.
 - No requirement that `reset()` snap the live mesh orientation back to zero (§3.3).
+- No HDRI files, texture assets, or any other binary asset bundled into the repo for environment presets — procedural `Lightformer`s only (§6).
+- No link-shortening, server-side storage, or persistence of shared links beyond the URL itself — a shareable link is nothing more than the current `StudioState` serialized into query params (§7).
