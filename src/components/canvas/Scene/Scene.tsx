@@ -1,9 +1,10 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Environment, Lightformer } from '@react-three/drei';
 import type { StudioState } from '@/types/studio';
 import { StudioLights } from '@/components/canvas/StudioLights';
 import { StageFloor } from '@/components/canvas/StageFloor';
 import { StudioObject } from '@/components/canvas/StudioObject';
+import { STUDIO_LIGHTFORMERS } from '@/constants/studio';
 import styles from './Scene.module.css';
 
 interface SceneProps {
@@ -24,6 +25,18 @@ export const Scene = ({ state }: SceneProps) => {
           speed={state.speed}
         />
         <OrbitControls enableDamping dampingFactor={0.05} />
+        <Environment resolution={256}>
+          {STUDIO_LIGHTFORMERS.map((lf, i) => (
+            <Lightformer
+              key={i}
+              form={lf.form}
+              color={lf.color}
+              intensity={lf.intensity}
+              scale={lf.scale as unknown as number}
+              position={lf.position}
+            />
+          ))}
+        </Environment>
       </Canvas>
     </div>
   );

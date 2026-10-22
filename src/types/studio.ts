@@ -19,3 +19,11 @@ export interface StudioActions {
 }
 
 export type UseStudioStateReturn = { state: StudioState } & StudioActions;
+
+export interface LightformerConfig {
+  position: readonly [number, number, number];
+  color: string;
+  intensity: number;
+  scale: number | readonly [number, number];
+  form: 'rect' | 'circle' | 'ring';
+}

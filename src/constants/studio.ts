@@ -1,4 +1,4 @@
-import type { StudioState, ShapeType, MaterialType } from '@/types/studio';
+import type { StudioState, ShapeType, MaterialType, LightformerConfig } from '@/types/studio';
 
 export const DEFAULT_STUDIO_STATE: StudioState = {
   shape: 'box',
@@ -19,3 +19,8 @@ export const COLOR_SWATCHES = [
 ] as const;
 
 export const SPEED_BOUNDS = { min: 0, max: 5, step: 1 } as const;
+
+export const STUDIO_LIGHTFORMERS: readonly LightformerConfig[] = [
+  { position: [0, 4, 0], color: '#ffffff', intensity: 2, scale: 6, form: 'rect' },
+  { position: [-4, 1, 2], color: '#e2e8f0', intensity: 1, scale: 3, form: 'rect' },
+];
