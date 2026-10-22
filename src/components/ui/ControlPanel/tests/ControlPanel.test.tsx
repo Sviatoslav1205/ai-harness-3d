@@ -61,6 +61,20 @@ describe('ControlPanel', () => {
     expect(screen.getByTestId('color-swatch-emerald')).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('updates the active environment when an environment button is clicked', () => {
+    // Arrange
+    render(<ControlPanelHarness />);
+
+    // Act
+    fireEvent.click(screen.getByTestId('environment-selector-sunset'));
+
+    // Assert
+    expect(screen.getByTestId('environment-selector-sunset')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
   it('flips the auto-rotate toggle label when clicked', () => {
     // Arrange
     render(<ControlPanelHarness />);
@@ -91,6 +105,7 @@ describe('ControlPanel', () => {
     fireEvent.click(screen.getByTestId('shape-selector-icosahedron'));
     fireEvent.click(screen.getByTestId('material-selector-wireframe'));
     fireEvent.click(screen.getByTestId('color-swatch-crimson'));
+    fireEvent.click(screen.getByTestId('environment-selector-sunset'));
     fireEvent.click(screen.getByTestId('auto-rotate-toggle'));
     fireEvent.change(screen.getByTestId('rotation-speed-slider'), {
       target: { value: '4' },
@@ -106,6 +121,10 @@ describe('ControlPanel', () => {
       'true',
     );
     expect(screen.getByTestId('color-swatch-cyber-blue')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByTestId('environment-selector-studio')).toHaveAttribute(
       'aria-pressed',
       'true',
     );

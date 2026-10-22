@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DEFAULT_STUDIO_STATE } from '@/constants/studio';
 import type {
+  EnvironmentPreset,
   MaterialType,
   ShapeType,
   StudioState,
@@ -22,6 +23,10 @@ export const useStudioState = (): UseStudioStateReturn => {
     setState((previous) => ({ ...previous, color }));
   };
 
+  const setEnvironment = (environment: EnvironmentPreset): void => {
+    setState((previous) => ({ ...previous, environment }));
+  };
+
   const setAutoRotate = (autoRotate: boolean): void => {
     setState((previous) => ({ ...previous, autoRotate }));
   };
@@ -39,6 +44,7 @@ export const useStudioState = (): UseStudioStateReturn => {
     setShape,
     setMaterial,
     setColor,
+    setEnvironment,
     setAutoRotate,
     setSpeed,
     reset,

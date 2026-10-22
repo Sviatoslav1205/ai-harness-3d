@@ -63,6 +63,23 @@ describe('useStudioState', () => {
     });
   });
 
+  it('updates only the environment field when setEnvironment is called', () => {
+    // Arrange
+    const { result } = renderHook(() => useStudioState());
+
+    // Act
+    act(() => {
+      result.current.setEnvironment('sunset');
+    });
+
+    // Assert
+    expect(result.current.state.environment).toBe('sunset');
+    expect(result.current.state).toEqual({
+      ...DEFAULT_STUDIO_STATE,
+      environment: 'sunset',
+    });
+  });
+
   it('updates only the autoRotate field when setAutoRotate is called', () => {
     // Arrange
     const { result } = renderHook(() => useStudioState());
@@ -106,6 +123,7 @@ describe('useStudioState', () => {
       result.current.setShape('icosahedron');
       result.current.setMaterial('wireframe');
       result.current.setColor('#ef4444');
+      result.current.setEnvironment('night');
       result.current.setAutoRotate(true);
       result.current.setSpeed(4);
     });

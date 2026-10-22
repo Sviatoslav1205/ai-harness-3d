@@ -2,6 +2,7 @@ import type { StudioActions, StudioState } from '@/types/studio';
 import { ShapeSelector } from '@/components/ui/ShapeSelector';
 import { MaterialSelector } from '@/components/ui/MaterialSelector';
 import { ColorSwatches } from '@/components/ui/ColorSwatches';
+import { EnvironmentSelector } from '@/components/ui/EnvironmentSelector';
 import { RotationControls } from '@/components/ui/RotationControls';
 import { ResetButton } from '@/components/ui/ResetButton';
 import styles from './ControlPanel.module.css';
@@ -15,6 +16,7 @@ export const ControlPanel = ({
   setShape,
   setMaterial,
   setColor,
+  setEnvironment,
   setAutoRotate,
   setSpeed,
   reset,
@@ -24,6 +26,7 @@ export const ControlPanel = ({
       <ShapeSelector shape={state.shape} onShapeChange={setShape} />
       <MaterialSelector material={state.material} onMaterialChange={setMaterial} />
       <ColorSwatches color={state.color} setColor={setColor} />
+      <EnvironmentSelector environment={state.environment} onEnvironmentChange={setEnvironment} />
       <RotationControls
         autoRotate={state.autoRotate}
         setAutoRotate={setAutoRotate}

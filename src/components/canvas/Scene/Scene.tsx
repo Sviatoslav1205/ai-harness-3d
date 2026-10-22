@@ -4,7 +4,7 @@ import type { StudioState } from '@/types/studio';
 import { StudioLights } from '@/components/canvas/StudioLights';
 import { StageFloor } from '@/components/canvas/StageFloor';
 import { StudioObject } from '@/components/canvas/StudioObject';
-import { STUDIO_LIGHTFORMERS } from '@/constants/studio';
+import { ENVIRONMENT_PRESETS } from '@/constants/studio';
 import styles from './Scene.module.css';
 
 interface SceneProps {
@@ -26,7 +26,7 @@ export const Scene = ({ state }: SceneProps) => {
         />
         <OrbitControls enableDamping dampingFactor={0.05} />
         <Environment resolution={256}>
-          {STUDIO_LIGHTFORMERS.map((lf, i) => (
+          {ENVIRONMENT_PRESETS[state.environment].map((lf, i) => (
             <Lightformer
               key={i}
               form={lf.form}
