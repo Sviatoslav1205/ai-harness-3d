@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { DEFAULT_STUDIO_STATE } from '@/constants/studio';
+import {
+  COLOR_SWATCHES,
+  DEFAULT_STUDIO_STATE,
+  ENVIRONMENT_OPTIONS,
+  MATERIAL_OPTIONS,
+  SHAPE_OPTIONS,
+} from '@/constants/studio';
 import type {
   EnvironmentPreset,
   MaterialType,
@@ -35,6 +41,15 @@ export const useStudioState = (): UseStudioStateReturn => {
     setState((previous) => ({ ...previous, speed }));
   };
 
+  const randomize = (): void => {
+    const shape = SHAPE_OPTIONS[Math.floor(Math.random() * SHAPE_OPTIONS.length)];
+    const material = MATERIAL_OPTIONS[Math.floor(Math.random() * MATERIAL_OPTIONS.length)];
+    const color = COLOR_SWATCHES[Math.floor(Math.random() * COLOR_SWATCHES.length)].hex;
+    const environment =
+      ENVIRONMENT_OPTIONS[Math.floor(Math.random() * ENVIRONMENT_OPTIONS.length)];
+    setState((previous) => ({ ...previous, shape, material, color, environment }));
+  };
+
   const reset = (): void => {
     setState({ ...DEFAULT_STUDIO_STATE });
   };
@@ -47,6 +62,7 @@ export const useStudioState = (): UseStudioStateReturn => {
     setEnvironment,
     setAutoRotate,
     setSpeed,
+    randomize,
     reset,
   };
 };

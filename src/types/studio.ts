@@ -18,6 +18,7 @@ export interface StudioActions {
   setEnvironment: (environment: EnvironmentPreset) => void;
   setAutoRotate: (autoRotate: boolean) => void;
   setSpeed: (speed: number) => void;
+  randomize: () => void;
   reset: () => void;
 }
 

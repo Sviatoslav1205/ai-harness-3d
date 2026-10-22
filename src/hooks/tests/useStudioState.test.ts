@@ -1,6 +1,12 @@
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
-import { DEFAULT_STUDIO_STATE } from '@/constants/studio';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  COLOR_SWATCHES,
+  DEFAULT_STUDIO_STATE,
+  ENVIRONMENT_OPTIONS,
+  MATERIAL_OPTIONS,
+  SHAPE_OPTIONS,
+} from '@/constants/studio';
 import { useStudioState } from '@/hooks/useStudioState';
 
 describe('useStudioState', () => {
@@ -111,6 +117,29 @@ describe('useStudioState', () => {
     expect(result.current.state).toEqual({
       ...DEFAULT_STUDIO_STATE,
       speed: 5,
+    });
+  });
+
+  describe('randomize', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('lands on values from the existing valid option sets', () => {
+      // Arrange
+      vi.spyOn(Math, 'random').mockReturnValue(0.5);
+      const { result } = renderHook(() => useStudioState());
+
+      // Act
+      act(() => {
+        result.current.randomize();
+      });
+
+      // Assert
+      expect(SHAPE_OPTIONS).toContain(result.current.state.shape);
+      expect(MATERIAL_OPTIONS).toContain(result.current.state.material);
+      expect(COLOR_SWATCHES.map((swatch) => swatch.hex)).toContain(result.current.state.color);
+      expect(ENVIRONMENT_OPTIONS).toContain(result.current.state.environment);
     });
   });
 

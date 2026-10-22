@@ -4,6 +4,7 @@ import { MaterialSelector } from '@/components/ui/MaterialSelector';
 import { ColorSwatches } from '@/components/ui/ColorSwatches';
 import { EnvironmentSelector } from '@/components/ui/EnvironmentSelector';
 import { RotationControls } from '@/components/ui/RotationControls';
+import { SurpriseButton } from '@/components/ui/SurpriseButton';
 import { ResetButton } from '@/components/ui/ResetButton';
 import styles from './ControlPanel.module.css';
 
@@ -19,6 +20,7 @@ export const ControlPanel = ({
   setEnvironment,
   setAutoRotate,
   setSpeed,
+  randomize,
   reset,
 }: ControlPanelProps) => {
   return (
@@ -33,6 +35,7 @@ export const ControlPanel = ({
         speed={state.speed}
         setSpeed={setSpeed}
       />
+      <SurpriseButton randomize={randomize} />
       <ResetButton reset={reset} />
     </div>
   );
