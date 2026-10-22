@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   COLOR_SWATCHES,
   DEFAULT_STUDIO_STATE,
@@ -6,6 +6,7 @@ import {
   MATERIAL_OPTIONS,
   SHAPE_OPTIONS,
 } from '@/constants/studio';
+import { decodeStudioState } from '@/hooks/useShareableLink';
 import type {
   EnvironmentPreset,
   MaterialType,
@@ -15,7 +16,20 @@ import type {
 } from '@/types/studio';
 
 export const useStudioState = (): UseStudioStateReturn => {
-  const [state, setState] = useState<StudioState>(DEFAULT_STUDIO_STATE);
+  const hadSharedParamsRef = useRef(false);
+
+  const [state, setState] = useState<StudioState>(() => {
+    const params = new URLSearchParams(window.location.search);
+    hadSharedParamsRef.current = params.toString().length > 0;
+    const decoded = decodeStudioState(params);
+    return { ...DEFAULT_STUDIO_STATE, ...decoded };
+  });
+
+  useEffect(() => {
+    if (hadSharedParamsRef.current) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
 
   const setShape = (shape: ShapeType): void => {
     setState((previous) => ({ ...previous, shape }));

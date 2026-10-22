@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   COLOR_SWATCHES,
   DEFAULT_STUDIO_STATE,
@@ -10,6 +10,14 @@ import {
 import { useStudioState } from '@/hooks/useStudioState';
 
 describe('useStudioState', () => {
+  beforeEach(() => {
+    window.history.pushState({}, '', '/');
+  });
+
+  afterEach(() => {
+    window.history.pushState({}, '', '/');
+  });
+
   it('initializes with the default studio state', () => {
     // Arrange & Act
     const { result } = renderHook(() => useStudioState());
@@ -162,5 +170,56 @@ describe('useStudioState', () => {
 
     // Assert
     expect(result.current.state).toEqual(DEFAULT_STUDIO_STATE);
+  });
+
+  describe('shareable-link initialization', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+      window.history.pushState({}, '', '/');
+    });
+
+    it('initializes to defaults and does not clean the URL when there are no query params', () => {
+      // Arrange
+      window.history.pushState({}, '', '/');
+      const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+      // Act
+      const { result } = renderHook(() => useStudioState());
+
+      // Assert
+      expect(result.current.state).toEqual(DEFAULT_STUDIO_STATE);
+      expect(replaceStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('merges valid decoded params over defaults and cleans the URL', () => {
+      // Arrange
+      window.history.pushState({}, '', '?shape=torusKnot&color=%2310b981');
+      const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+      // Act
+      const { result } = renderHook(() => useStudioState());
+
+      // Assert
+      expect(result.current.state).toEqual({
+        ...DEFAULT_STUDIO_STATE,
+        shape: 'torusKnot',
+        color: '#10b981',
+      });
+      expect(replaceStateSpy).toHaveBeenCalledTimes(1);
+      expect(replaceStateSpy).toHaveBeenCalledWith(null, '', window.location.pathname);
+    });
+
+    it('ignores malformed params but still cleans the URL', () => {
+      // Arrange
+      window.history.pushState({}, '', '?shape=sphere&speed=fast');
+      const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+      // Act
+      const { result } = renderHook(() => useStudioState());
+
+      // Assert
+      expect(result.current.state).toEqual(DEFAULT_STUDIO_STATE);
+      expect(replaceStateSpy).toHaveBeenCalledTimes(1);
+    });
   });
 });
