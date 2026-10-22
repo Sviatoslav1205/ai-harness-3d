@@ -5,6 +5,7 @@ import { ColorSwatches } from '@/components/ui/ColorSwatches';
 import { EnvironmentSelector } from '@/components/ui/EnvironmentSelector';
 import { RotationControls } from '@/components/ui/RotationControls';
 import { SurpriseButton } from '@/components/ui/SurpriseButton';
+import { CopyLinkButton } from '@/components/ui/CopyLinkButton';
 import { ResetButton } from '@/components/ui/ResetButton';
 import styles from './ControlPanel.module.css';
 
@@ -36,6 +37,7 @@ export const ControlPanel = ({
         setSpeed={setSpeed}
       />
       <SurpriseButton randomize={randomize} />
+      <CopyLinkButton state={state} />
       <ResetButton reset={reset} />
     </div>
   );

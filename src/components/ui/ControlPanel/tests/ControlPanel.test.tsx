@@ -99,6 +99,17 @@ describe('ControlPanel', () => {
     expect(screen.getByTestId('rotation-speed-slider')).toHaveValue('5');
   });
 
+  it('renders the Copy Link button', () => {
+    // Arrange
+    render(<ControlPanelHarness />);
+
+    // Act
+    const copyLinkButton = screen.getByTestId('copy-link-button');
+
+    // Assert
+    expect(copyLinkButton).toBeInTheDocument();
+  });
+
   it('restores all fields to defaults when Reset Studio is clicked', () => {
     // Arrange
     render(<ControlPanelHarness />);

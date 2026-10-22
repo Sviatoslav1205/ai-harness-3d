@@ -50,3 +50,9 @@ export const decodeStudioState = (params: URLSearchParams): Partial<StudioState>
 
   return decoded;
 };
+
+export const copyLink = async (state: StudioState): Promise<void> => {
+  const params = encodeStudioState(state);
+  const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+  await navigator.clipboard.writeText(url);
+};
